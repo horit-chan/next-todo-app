@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useTodos } from "./useTodos";
 import TodoItem from "./TodoItem";
 import TodoForm from "./TodoForm";
+import TodoFilter from "./TodoFilter";
 
 
-type FilterType = 'all' | 'active' | 'completed' ;
+export type FilterType = 'all' | 'active' | 'completed' ;
 
 export default function TodoApp() {
     const { todos, addTodo, deleteTodo, toggleTodo } = useTodos();
@@ -27,11 +28,10 @@ export default function TodoApp() {
                 onAdd={addTodo}
             />
 
-            <div style={{ marginTop: '10px', marginBottom: '10px' }}>
-                <button onClick={() => setFilter('all')} style={{ fontWeight: filter === 'all' ? 'bold' : 'normal'}}>すべて</button>
-                <button onClick={() => setFilter('active')} style={{ fontWeight: filter === 'active' ? 'bold' : 'normal'}}>未完了</button>
-                <button onClick={() => setFilter('completed')} style={{ fontWeight: filter === 'completed' ? 'bold' : 'normal'}}>完了済み</button>
-            </div>
+            <TodoFilter
+                filter={filter}
+                setFilter={setFilter}
+            />
 
             <ul style={{ listStyle: 'none', padding: 0 }}>
                 {filterdTodos.map((todo) => (
