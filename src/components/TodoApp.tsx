@@ -3,26 +3,15 @@
 import { useState } from "react";
 import { useTodos } from "./useTodos";
 import TodoItem from "./TodoItem";
+import TodoForm from "./TodoForm";
 
 
 type FilterType = 'all' | 'active' | 'completed' ;
 
-function TodoApp() {
+export default function TodoApp() {
     const { todos, addTodo, deleteTodo, toggleTodo } = useTodos();
 
-    const [inputText, setInputText] = useState('');
-    const [deadline, setDeadline] = useState('');
-
     const [filter, setFilter] = useState<FilterType>('all');
-
-    const handleAdd = () => {
-        if (inputText === '') return;
-
-        addTodo(inputText,deadline);
-
-        setInputText('');
-        setDeadline('');
-    };
 
     const filterdTodos = todos.filter((todo) => {
         if (filter === 'active') return todo.completed === false;
@@ -34,23 +23,9 @@ function TodoApp() {
         <div style={{ padding: '20px', border: '2px solid purple', marginTop: '20px' }}>
             <h2>📝 TS版 Todoリスト</h2>
 
-            <div>
-                <input                 
-                    type="text"
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    placeholder="タスクを入力..."
-                />
-
-                <input                 
-                    type="date"
-                    value={deadline}
-                    onChange={(e) => setDeadline(e.target.value)}
-                    style={{ marginLeft: '10px', padding: '5px' }}
-                />
-
-                <button onClick={handleAdd}>追加</button>
-            </div>
+            <TodoForm
+                onAdd={addTodo}
+            />
 
             <div style={{ marginTop: '10px', marginBottom: '10px' }}>
                 <button onClick={() => setFilter('all')} style={{ fontWeight: filter === 'all' ? 'bold' : 'normal'}}>すべて</button>
@@ -71,5 +46,3 @@ function TodoApp() {
         </div>
     );
 }
-
-export default TodoApp

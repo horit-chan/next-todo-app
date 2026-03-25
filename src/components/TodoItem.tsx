@@ -7,7 +7,7 @@ type Props = {
     onDelete: (id: number) => void;
 };
 
-function TodoItem(props: Props) {
+export default function TodoItem(props: Props) {
     return (
         <li style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
             <input 
@@ -30,5 +30,3 @@ function TodoItem(props: Props) {
         </li>
     );
 }
-
-export default TodoItem;
