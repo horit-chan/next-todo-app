@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 
 export type TodoItem = {
     id: number;
     text: string;
     completed: boolean;
+    deadline?: string;
 };
 
 export const useTodos = () => {
@@ -24,8 +25,13 @@ export const useTodos = () => {
         }
     }, [todos]);
 
-    const addTodo = (text: string) => {
-        const newTodo: TodoItem = { id: Date.now(), text: text, completed: false };
+    const addTodo = (text: string, deadline: string) => {
+        const newTodo: TodoItem = { 
+            id: Date.now(), 
+            text: text, 
+            completed: false,
+            deadline: deadline 
+        };
         setTodos([...todos, newTodo]);
     };
 

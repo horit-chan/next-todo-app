@@ -1,24 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import TodoItem from "./TodoItem";
 import { useTodos } from "./useTodos";
+import TodoItem from "./TodoItem";
+
 
 type FilterType = 'all' | 'active' | 'completed' ;
 
 function TodoApp() {
     const { todos, addTodo, deleteTodo, toggleTodo } = useTodos();
 
-    const [inputText, setInputText] = useState("");
+    const [inputText, setInputText] = useState('');
+    const [deadline, setDeadline] = useState('');
 
     const [filter, setFilter] = useState<FilterType>('all');
 
     const handleAdd = () => {
-        if (inputText === "") return;
+        if (inputText === '') return;
 
-        addTodo(inputText);
+        addTodo(inputText,deadline);
 
-        setInputText("");
+        setInputText('');
+        setDeadline('');
     };
 
     const filterdTodos = todos.filter((todo) => {
@@ -38,6 +41,14 @@ function TodoApp() {
                     onChange={(e) => setInputText(e.target.value)}
                     placeholder="タスクを入力..."
                 />
+
+                <input                 
+                    type="date"
+                    value={deadline}
+                    onChange={(e) => setDeadline(e.target.value)}
+                    style={{ marginLeft: '10px', padding: '5px' }}
+                />
+
                 <button onClick={handleAdd}>追加</button>
             </div>
 

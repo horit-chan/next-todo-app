@@ -1,9 +1,7 @@
+import {TodoItem as TodoType} from "./useTodos";
+
 type Props = {
-    todo: {
-        id: number;
-        text: string;
-        completed: boolean;
-    };
+    todo: TodoType;
 
     onToggle: (id: number) => void;
     onDelete: (id: number) => void;
@@ -21,6 +19,11 @@ function TodoItem(props: Props) {
             <span style={{ textDecoration: props.todo.completed ? 'line-through' : 'none', color: props.todo.completed ? 'gray' : 'black'}}>
                 {props.todo.text}
             </span>
+            {props.todo.deadline && (
+                <span style={{ marginLeft: '10px', color: '#ff4444', fontSize: '0.9em', fontWeight: 'bold' }}>
+                    ⏰️ 期限：{props.todo.deadline}
+                </span>
+            )}
             <button onClick={() => props.onDelete(props.todo.id)} style={{ marginLeft: ' auto', color: 'red' }}>
                 削除
             </button>
