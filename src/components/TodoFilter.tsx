@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { FilterType } from "./TodoApp";
+import { FilterType } from "./useTodos";
 
 type Props = {
     filter: string;

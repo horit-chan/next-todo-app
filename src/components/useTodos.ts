@@ -9,8 +9,18 @@ export type TodoItem = {
     deadline?: string;
 };
 
+export type FilterType = 'all' | 'active' | 'completed' ;
+
 export const useTodos = () => {
     const [todos, setTodos] = useState<TodoItem[]>([]);
+
+    const [filter, setFilter] = useState<FilterType>('all');
+
+    const filteredTodos = todos.filter((todo) => {
+        if (filter === 'active') return todo.completed === false;
+        if (filter === 'completed') return todo.completed === true;
+        return true;
+    });
 
     useEffect(() => {
         const savedData = localStorage.getItem("my-todos");
@@ -46,7 +56,9 @@ export const useTodos = () => {
     };
 
     return {
-        todos,
+        filteredTodos,
+        filter,
+        setFilter,
         addTodo,
         deleteTodo,
         toggleTodo
