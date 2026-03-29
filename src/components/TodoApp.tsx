@@ -9,8 +9,10 @@ export default function TodoApp() {
     const { filteredTodos, filter, setFilter, addTodo, deleteTodo, toggleTodo } = useTodos();
 
     return (
-        <div style={{ padding: '20px', border: '2px solid purple', marginTop: '20px' }}>
-            <h2>📝 TS版 Todoリスト</h2>
+        <div className="bg-slate-100 min-h-screen p-8">
+            <h1 className="text-4xl font-extrabold text-blue-600 mb-8 text-center">
+                📝 TS版 Todoリスト
+            </h1>
 
             <TodoForm
                 onAdd={addTodo}
