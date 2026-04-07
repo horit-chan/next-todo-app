@@ -23,26 +23,40 @@ export const useTodos = () => {
     });
 
     useEffect(() => {
-        const savedData = localStorage.getItem("my-todos");
-        if (savedData) {
-            setTodos(JSON.parse(savedData))
-        }
+        const fetchTodos = async () => {
+            try {
+                const response = await fetch('/api/todos');
+                const data = await response.json();
+                setTodos(data);
+            } catch (error) {
+                console.error("データの取得に失敗しました😭", error);
+            }
+        };
+        
+        fetchTodos();
     }, []);
 
-    useEffect(() => {
-        if (todos.length > 0) {
-            localStorage.setItem("my-todos", JSON.stringify(todos))
-        }
-    }, [todos]);
-
-    const addTodo = (text: string, deadline: string) => {
+    const addTodo = async (text: string, deadline: string) => {
         const newTodo: TodoItem = { 
             id: Date.now(), 
             text: text, 
             completed: false,
             deadline: deadline 
         };
+
         setTodos([...todos, newTodo]);
+
+        try {
+            await fetch('/api/todos', {
+                method: 'POST',
+                headers: {
+                    'COntent-Type': 'application/json',
+                },
+                body: JSON.stringify(newTodo),
+            });
+        } catch (error) {
+            console.error("データの保存に失敗しました😭", error);
+        }
     };
 
     const deleteTodo = (idToRemove: number) => {
