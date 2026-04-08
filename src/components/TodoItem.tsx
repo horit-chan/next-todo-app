@@ -3,8 +3,8 @@ import {TodoItem as TodoType} from "./useTodos";
 type Props = {
     todo: TodoType;
 
-    onToggle: (id: number) => void;
-    onDelete: (id: number) => void;
+    onToggle: (id: TodoType['id']) => void;
+    onDelete: (id: TodoType['id']) => void;
 };
 
 export default function TodoItem(props: Props) {

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 
 export type TodoItem = {
-    id: number;
+    id: string;
     text: string;
     completed: boolean;
     deadline?: string;
@@ -37,33 +37,30 @@ export const useTodos = () => {
     }, []);
 
     const addTodo = async (text: string, deadline: string) => {
-        const newTodo: TodoItem = { 
-            id: Date.now(), 
-            text: text, 
-            completed: false,
-            deadline: deadline 
-        };
-
-        setTodos([...todos, newTodo]);
 
         try {
-            await fetch('/api/todos', {
+            const response = await fetch('/api/todos', {
                 method: 'POST',
                 headers: {
-                    'COntent-Type': 'application/json',
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(newTodo),
+                body: JSON.stringify({ text: text, completed: false, deadline: deadline}),
             });
+
+            const savedTodo = await response.json();
+
+            setTodos([...todos, savedTodo]);
+
         } catch (error) {
             console.error("データの保存に失敗しました😭", error);
         }
     };
 
-    const deleteTodo = (idToRemove: number) => {
+    const deleteTodo = (idToRemove: string) => {
         setTodos(todos.filter((todo) => todo.id !== idToRemove));
     };
 
-    const toggleTodo = (idToToggle: number) => {
+    const toggleTodo = (idToToggle: string) => {
         setTodos(todos.map((todo) =>
             todo.id === idToToggle ? { ...todo, completed: !todo.completed } : todo
         ));

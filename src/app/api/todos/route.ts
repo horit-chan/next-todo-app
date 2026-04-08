@@ -1,21 +1,38 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js"
 
-let serverTodos = [
-    { id: 1, text: "API通信をマスターする🔥", completed: false, deadline: "2026-12-31"},
-    { id: 2, text: "Next.jsの神になる", completed: false}
-];
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Todo一覧を取得する
 export async function GET() {
-    console.log("サーバー：GETリクエストを受け取りました！");
-    return NextResponse.json(serverTodos);
+    const { data, error } = await supabase
+        .from('todos')
+        .select('*')
+        .order('created_at', { ascending: true});
+
+    if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
 }
 
+// 新しいTodoを追加する
 export async function POST(request: Request) {
-    console.log("サーバー：POSTリクエストを受け取りました！");
+    const body = await request.json();
 
-    const newTodo = await request.json();
+    const { data, error } = await supabase
+        .from('todos')
+        .insert([
+            { text: body.text, completed: body.completed }
+        ])
+        .select();
 
-    serverTodos.push(newTodo);
+    if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500});
+    }
 
-    return NextResponse.json({ message: "保存大成功！", adedTodo: newTodo });
+    return NextResponse.json(data[0]);
 }
