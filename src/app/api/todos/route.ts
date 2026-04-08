@@ -36,3 +36,33 @@ export async function POST(request: Request) {
 
     return NextResponse.json(data[0]);
 }
+
+export async function DELETE(request: Request) {
+    const body = await request.json();
+
+    const { error } = await supabase
+        .from('todos')
+        .delete()
+        .eq('id', body.id);
+
+    if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ message: '削除完了！' });
+}
+
+export async function PATCH(request: Request) {
+    const body = await request.json();
+
+    const { error } = await supabase
+        .from('todos')
+        .update({ completed: body.completed})
+        .eq('id', body.id);
+
+    if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ message: '更新完了！' });
+}

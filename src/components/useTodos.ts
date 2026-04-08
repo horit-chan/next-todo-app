@@ -44,7 +44,7 @@ export const useTodos = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ text: text, completed: false, deadline: deadline}),
+                body: JSON.stringify({ text, completed: false, deadline}),
             });
 
             const savedTodo = await response.json();
@@ -56,14 +56,58 @@ export const useTodos = () => {
         }
     };
 
-    const deleteTodo = (idToRemove: string) => {
+    const deleteTodo = async (idToRemove: string) => {
+        // ロールバック用
+        const previousTodos = [...todos];
+
         setTodos(todos.filter((todo) => todo.id !== idToRemove));
+
+        try {
+            const response = await fetch('/api/todos', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({id: idToRemove}),
+            });
+            
+            if (!response.ok) throw new Error('サーバーでの削除に失敗しました');
+
+        } catch(error) {
+            console.error("データの削除に失敗しました😭", error);
+
+            // ロールバック
+            setTodos(previousTodos);
+
+            alert("通信エラーで消せませんでした！画面をもとに戻します🙏")
+        }
     };
 
-    const toggleTodo = (idToToggle: string) => {
+    const toggleTodo = async (idToToggle: string) => {
+        const previousTodos = [...todos];
+
+        const targetTodo = todos.find(todo => todo.id === idToToggle);
+        if (!targetTodo) return;
+        const newCompletedStatus = !targetTodo.completed;
+
         setTodos(todos.map((todo) =>
-            todo.id === idToToggle ? { ...todo, completed: !todo.completed } : todo
+            todo.id === idToToggle ? { ...todo, completed: newCompletedStatus } : todo
         ));
+
+        try {
+            const response = await fetch('/api/todos', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({id: idToToggle, completed: newCompletedStatus }),
+            });
+
+            if (!response.ok) throw new Error("サーバーでの更新に失敗しました");
+        } catch(error) {
+            console.error("データの更新に失敗しました😭", error);
+
+            setTodos(previousTodos);
+            alert("通信エラーでチェックを切り替えられませんでした！");
+        }
     };
 
     return {
