@@ -1,26 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@supabase/supabase-js"
 import Link from "next/link";
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!, 
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { useRouter } from "next/navigation";
+import { supabase } from "@/utils/supabase";
 
 export default function LoginPage() {
     const [email, setEmail ] = useState("");
     const [password, setPassword ] = useState("");
     const [message, setMessage ] = useState("");
+    const router = useRouter();
 
     // 👤 新規登録（サインアップ）の処理
     const handleSignUp = async () => {
         setMessage("登録中...");
         const { error } = await supabase.auth.signUp({ email, password });
 
-        if (error) setMessage(`❌️ エラー: ${error.message}`);
-        else setMessage("✅️ 登録成功！ログインしてください！");
+        if (error) {
+            setMessage(`❌️ エラー: ${error.message}`);
+        } else {
+            setMessage("✅️ 登録成功!Todo画面へ移動します...");
+            router.push("/")
+        }
     };
 
     // 🔑 ログイン（サインイン）の処理
@@ -28,8 +29,12 @@ export default function LoginPage() {
         setMessage("ログイン中...");
         const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-        if (error) setMessage(`❌️ エラー：${error.message}`);
-        else setMessage("✅️ ログイン大成功!（※後でTodo画面へワープさせます）")
+        if (error) {
+            setMessage(`❌️ エラー：${error.message}`);
+        } else {
+            setMessage("✅️ ログイン大成功!（※後でTodo画面へワープさせます）")
+            router.push("/");
+        }
     };
 
     return (
@@ -39,13 +44,13 @@ export default function LoginPage() {
                     🔑 ログイン画面
                 </h1>
 
-                <div className="text-gray-600 text-center mb-6">
+                <div className="flex flex-col gap-4 mb-6">
                     <input
                         type="email"
                         placeholder="メールアドレス"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="border border-gray-300 p-3 rounded-lg focus: outlinej-none focus:ring-2 focus:ring-blue-500"
+                        className="border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <input
                         type="password"
@@ -56,7 +61,7 @@ export default function LoginPage() {
                     />
                 </div>
 
-                <div className="flex flex=col gap-3 mb-6">
+                <div className="flex flex-col gap-3 mb-6">
                     <button
                         onClick={handleLogin}
                         className="bg-blue-600 text-white font-bold p-3 rounded-lg hover:bg-blue-700 transition-colors"
@@ -72,7 +77,7 @@ export default function LoginPage() {
                 </div>
 
                 {message && (
-                    <p className="text=center fontj-bold text-sm mb-4 text-re-500">
+                    <p className="text-center fontj-bold text-sm mb-4 text-red-500">
                         {message}
                     </p>
                 )}

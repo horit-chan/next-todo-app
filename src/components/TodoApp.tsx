@@ -7,13 +7,39 @@ import TodoFilter from "./TodoFilter";
 import Link from "next/link"
 
 export default function TodoApp() {
-    const { filteredTodos, filter, setFilter, addTodo, deleteTodo, toggleTodo } = useTodos();
+    const { 
+        filteredTodos, 
+        filter, 
+        setFilter, 
+        addTodo, 
+        deleteTodo, 
+        toggleTodo,
+        userId,
+        isAuthLoading,
+        logout
+    } = useTodos();
+
+    if (isAuthLoading) {
+        return (
+            <div className="bg-slate-100 min=h=screen flex items-center justify-center font-bold text-xl text-gray-600">
+                認証チェック中...🕵️
+            </div>
+        );
+    }
+
+    if (!userId) return null;
 
     return (
         <div className="bg-slate-100 min-h-screen p-8">
             <h1 className="text-4xl font-extrabold text-blue-600 mb-8 text-center">
                 📝 TS版 Todoリスト
             </h1>
+            <button
+                onClick={logout}
+                className="bg-red-100 text-red-600 px-4 py-2 rounded-lg font-bold hover:bg-red-200 transition-colors"
+                >
+                    ログアウト
+                </button>
 
             <div className="text-center mb-8">
                 <Link

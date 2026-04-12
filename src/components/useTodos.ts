@@ -1,20 +1,26 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/utils/supabase";
+import { todo } from "node:test";
 
 export type TodoItem = {
     id: string;
     text: string;
     completed: boolean;
     deadline?: string;
+    user_id?: string;
 };
 
 export type FilterType = 'all' | 'active' | 'completed' ;
 
 export const useTodos = () => {
     const [todos, setTodos] = useState<TodoItem[]>([]);
-
     const [filter, setFilter] = useState<FilterType>('all');
+
+    const [userId, setUserId] = useState<string | null>(null);
+    const [isAuthLoading, setIsAuthLoading] = useState(true);
 
     const filteredTodos = todos.filter((todo) => {
         if (filter === 'active') return todo.completed === false;
@@ -22,56 +28,77 @@ export const useTodos = () => {
         return true;
     });
 
-    useEffect(() => {
-        const fetchTodos = async () => {
-            try {
-                const response = await fetch('/api/todos');
-                const data = await response.json();
-                setTodos(data);
-            } catch (error) {
-                console.error("データの取得に失敗しました😭", error);
-            }
-        };
-        
-        fetchTodos();
-    }, []);
+    const router = useRouter();
 
+    // 初期化：ログインチェック & データ取得
+    useEffect(() => {
+        const initAuthAndFetch = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (user) {
+                setUserId(user.id);
+                const { data, error } = await supabase
+                    .from('todos')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (!error && data) setTodos(data);
+            } else {
+                router.push("/login")
+            }
+
+            setIsAuthLoading(false);
+        };
+
+        initAuthAndFetch();
+    }, [router]);
+
+    // 追加
     const addTodo = async (text: TodoItem['text'], deadline: TodoItem['deadline']) => {
+        if (!userId) return;
+
+        const tempId = crypto.randomUUID();
+        const newTodo: TodoItem = { id: tempId, text, completed: false, deadline, user_id: userId}
+        setTodos([...todos, newTodo]);
 
         try {
-            const response = await fetch('/api/todos', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ text, completed: false, deadline}),
-            });
+            // 一旦追加して
+            const { error } = await supabase
+                .from('todos')
+                .insert([{ text, completed: false , deadline, user_id: userId}]);
 
-            const savedTodo = await response.json();
+            if (error) throw error;
 
-            setTodos([...todos, savedTodo]);
+            // そのユーザーの全件取得
+            const { data } = await supabase
+                .from('todos')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (data) setTodos(data);
 
         } catch (error) {
             console.error("データの保存に失敗しました😭", error);
+            setTodos(todos.filter(todo => todo.id !== tempId));
         }
     };
 
+    // 削除
     const deleteTodo = async (idToRemove: TodoItem['id']) => {
+        if (!userId) return;
+
         // ロールバック用
         const previousTodos = [...todos];
 
         setTodos(todos.filter((todo) => todo.id !== idToRemove));
 
         try {
-            const response = await fetch('/api/todos', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({id: idToRemove}),
-            });
+            const { error } = await supabase
+                .from('todos')
+                .delete()
+                .eq('id', idToRemove);
             
-            if (!response.ok) throw new Error('サーバーでの削除に失敗しました');
+            if (error) throw error;
 
         } catch(error) {
             console.error("データの削除に失敗しました😭", error);
@@ -83,7 +110,10 @@ export const useTodos = () => {
         }
     };
 
+    // チェックボックス
     const toggleTodo = async (idToToggle: TodoItem['id']) => {
+        if (!userId) return;
+        
         const previousTodos = [...todos];
 
         const targetTodo = todos.find(todo => todo.id === idToToggle);
@@ -95,13 +125,12 @@ export const useTodos = () => {
         ));
 
         try {
-            const response = await fetch('/api/todos', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({id: idToToggle, completed: newCompletedStatus }),
-            });
+            const { error } = await supabase
+                .from('todos')
+                .update({ completed: newCompletedStatus })
+                .eq('id', idToToggle);
+            if (error) throw error;
 
-            if (!response.ok) throw new Error("サーバーでの更新に失敗しました");
         } catch(error) {
             console.error("データの更新に失敗しました😭", error);
 
@@ -110,12 +139,21 @@ export const useTodos = () => {
         }
     };
 
+    // ログアウト
+    const logout = async () => {
+        await supabase.auth.signOut();
+        setUserId(null);
+    };
+
     return {
         filteredTodos,
         filter,
         setFilter,
         addTodo,
         deleteTodo,
-        toggleTodo
+        toggleTodo,
+        userId,
+        isAuthLoading,
+        logout
     };
 };
