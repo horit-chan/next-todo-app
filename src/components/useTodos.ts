@@ -36,7 +36,7 @@ export const useTodos = () => {
         fetchTodos();
     }, []);
 
-    const addTodo = async (text: string, deadline: string) => {
+    const addTodo = async (text: TodoItem['text'], deadline: TodoItem['deadline']) => {
 
         try {
             const response = await fetch('/api/todos', {
@@ -56,7 +56,7 @@ export const useTodos = () => {
         }
     };
 
-    const deleteTodo = async (idToRemove: string) => {
+    const deleteTodo = async (idToRemove: TodoItem['id']) => {
         // ロールバック用
         const previousTodos = [...todos];
 
@@ -83,7 +83,7 @@ export const useTodos = () => {
         }
     };
 
-    const toggleTodo = async (idToToggle: string) => {
+    const toggleTodo = async (idToToggle: TodoItem['id']) => {
         const previousTodos = [...todos];
 
         const targetTodo = todos.find(todo => todo.id === idToToggle);
