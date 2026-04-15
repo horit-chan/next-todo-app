@@ -1,40 +1,39 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 type Props = {
-    onAdd: (text: string, deadline: string) => void;
+  onAdd: (text: string, deadline: string) => void;
 };
 
 export default function TodoForm(props: Props) {
+  const [inputText, setInputText] = useState('');
+  const [deadline, setDeadline] = useState('');
 
-    const [inputText, setInputText] = useState('');
-    const [deadline, setDeadline] = useState('');
+  const handleAddTodo = () => {
+    if (inputText.trim() === '') return;
 
-    const handleAddTodo = () => {
-        if (inputText.trim() === '') return;
+    props.onAdd(inputText, deadline);
 
-        props.onAdd(inputText,deadline);
+    setInputText('');
+    setDeadline('');
+  };
 
-        setInputText('');
-        setDeadline('');
-    };
+  return (
+    <div>
+      <input
+        type="text"
+        value={inputText}
+        onChange={(e) => setInputText(e.target.value)}
+        placeholder="タスクを入力..."
+      />
 
-    return(
-        <div>
-            <input                 
-                type="text"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder="タスクを入力..."
-            />
+      <input
+        type="date"
+        value={deadline}
+        onChange={(e) => setDeadline(e.target.value)}
+        style={{ marginLeft: '10px', padding: '5px' }}
+      />
 
-            <input                 
-                type="date"
-                value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
-                style={{ marginLeft: '10px', padding: '5px' }}
-            />
-
-            <button onClick={handleAddTodo}>追加</button>
-        </div>
-    );
+      <button onClick={handleAddTodo}>追加</button>
+    </div>
+  );
 }
